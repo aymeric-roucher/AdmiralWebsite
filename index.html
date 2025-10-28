@@ -195,8 +195,8 @@
       const contentWidth = canvas.scrollWidth;
       const contentHeight = canvas.scrollHeight;
 
-      const scaleX = containerWidth / contentWidth;
-      const scaleY = containerHeight / contentHeight;
+      const scaleX = containerWidth / contentWidth * 0.9;
+      const scaleY = containerHeight / contentHeight * 0.9;
       const scale = Math.min(scaleX, scaleY, 2); // Max 2x scale
 
       canvas.style.transform = `translate(-50%, -50%) scale(${scale})`;
