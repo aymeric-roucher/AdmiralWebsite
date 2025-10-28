@@ -15,7 +15,13 @@
       font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
       background: #000000;
       color: #ffffff;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+    }
+
+    html {
+      scroll-behavior: smooth;
     }
 
     .ascii-canvas {
@@ -27,7 +33,7 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%);
+      transform: translate(-50%, -40%);
     }
 
     .military-grid {
@@ -69,81 +75,103 @@
 
 <body>
 
-  <!-- Single Page Layout -->
-  <div class="h-screen flex flex-col military-grid relative overflow-hidden">
+  <!-- Scrollable Layout -->
+  <div class="flex flex-col military-grid relative">
 
     <!-- ASCII Animation Background -->
-    <div id="ascii-container" class="absolute inset-0 flex items-center justify-center opacity-30">
+    <div id="ascii-container" class="absolute inset-0 flex items-center justify-center opacity-25">
       <pre id="ascii-canvas" class="ascii-canvas"></pre>
     </div>
 
-    <!-- Industries Header - Full width at top -->
-    <div class="z-20">
-      <div class="grid grid-cols-5 gap-px bg-white bg-opacity-20">
-        <div
-          class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
-          <div class="industry-text text-center">Commodity Trading</div>
-        </div>
-        <div
-          class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
-          <div class="industry-text text-center">Supply Chain</div>
-        </div>
-        <div
-          class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
-          <div class="industry-text text-center">TIC</div>
-        </div>
-        <div
-          class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
-          <div class="industry-text text-center">Industrials</div>
-        </div>
-        <div
-          class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
-          <div class="industry-text text-center">Defense</div>
-        </div>
-      </div>
-    </div>
-
     <!-- Hero - Centered, takes full viewport height -->
-    <div class="relative z-10 flex items-center justify-center h-screen">
-      <div class="text-center">
-        <h1 class="text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight glow-text mb-8">
+    <div class="relative z-10 h-screen">
+      <!-- Admiral Labs - Absolutely centered on full viewport -->
+      <div class="absolute inset-0 flex items-center justify-center">
+        <h1 class="text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight glow-text text-center">
           Admiral Labs
         </h1>
-        <h2 class="text-2xl md:text-3xl lg:text-4xl font-light tracking-tight leading-tight">
+      </div>
+
+      <!-- Subtitle and Industries - Bottom section -->
+      <div class="absolute bottom-0 left-0 right-0 text-center pb-6">
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-light tracking-tight leading-tight mb-6">
           Secure AI for Mission Critical Operations
         </h2>
-      </div>
-    </div>
+        <div class="sticky top-0 z-20 max-w-4xl mx-auto px-4 bg-black py-2">
+          <div class="grid grid-cols-5 gap-px bg-white bg-opacity-20">
+            <div
+              class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
+              <div class="industry-text text-center">Commodity Trading</div>
+            </div>
+            <div
+              class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
+              <div class="industry-text text-center">Supply Chain</div>
+            </div>
+            <div
+              class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
+              <div class="industry-text text-center">TIC</div>
+            </div>
+            <div
+              class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
+              <div class="industry-text text-center">Industrials</div>
+            </div>
+            <div
+              class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
+              <div class="industry-text text-center">Defense</div>
+            </div>
+          </div>
+        </div>
 
-    <!-- Capabilities - Rows above footer -->
-    <div class="absolute bottom-32 left-1/2 transform -translate-x-1/2 z-20 w-full max-w-4xl px-8">
-      <div class="grid grid-cols-4 gap-8">
-        <div class="flex items-center justify-center">
-          <div class="text-md text-center">See Clearly</div>
-        </div>
-        <div class="flex items-center justify-center">
-          <div class="text-md text-center">Drive Top-Line Growth</div>
-        </div>
-        <div class="flex items-center justify-center">
-          <div class="text-md text-center">Automate with Confidence</div>
-        </div>
-        <div class="flex items-center justify-center">
-          <div class="text-md text-center">Expand Capacity, not Headcount</div>
+        <!-- Chevron Down -->
+        <div class="mt-3">
+          <svg class="w-12 h-12 text-white opacity-60 animate-bounce mx-auto" fill="none" stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
         </div>
       </div>
     </div>
 
     <!-- Static Mode Checkbox - Top right -->
     <div class="absolute top-20 right-8 z-20">
-      <label class="flex items-center gap-2 cursor-pointer text-xs" style="color: #999999; font-family: 'JetBrains Mono', ui-monospace, 'Courier New', monospace;">
+      <label class="flex items-center gap-2 cursor-pointer text-xs"
+        style="color: #999999; font-family: 'JetBrains Mono', ui-monospace, 'Courier New', monospace;">
         <input type="checkbox" id="static-mode" class="cursor-pointer">
         <span>STATIC</span>
       </label>
     </div>
 
-    <!-- Footer - Absolute positioned at bottom -->
-    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 text-center">
-      <div class="flex justify-center gap-8 mb-3 mono-caps text-xs" style="color: #999999;">
+  </div>
+
+  <!-- Capabilities Section - Below fold -->
+  <div class="relative z-10 py-24 px-8 bg-black">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-16 mb-32">
+        <div class="text-center">
+          <h3 class="text-3xl md:text-4xl font-light mb-4">See Clearly</h3>
+        </div>
+        <div class="text-center">
+          <h3 class="text-3xl md:text-4xl font-light mb-4">Drive Top-Line Growth</h3>
+        </div>
+        <div class="text-center">
+          <h3 class="text-3xl md:text-4xl font-light mb-4">Automate with Confidence</h3>
+        </div>
+        <div class="text-center">
+          <h3 class="text-3xl md:text-4xl font-light mb-4">Expand Capacity, not Headcount</h3>
+        </div>
+      </div>
+
+      <!-- Team Section Placeholder -->
+      <div class="text-center py-24 border-t border-white border-opacity-20">
+        <h2 class="text-4xl md:text-5xl font-light">Our Team</h2>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real Footer - At the very bottom -->
+  <div class="relative z-20 py-6 bg-black border-t border-white border-opacity-20">
+    <div class="flex flex-col items-center px-8 max-w-6xl mx-auto gap-2 text-center">
+      <div class="flex justify-center gap-8 mono-caps text-xs" style="color: #999999;">
         <span>New York</span>
         <span>—</span>
         <span>London</span>
@@ -156,6 +184,16 @@
   </div>
 
   <script>
+    // Ensure page starts at top
+    window.addEventListener('beforeunload', () => {
+      window.scrollTo(0, 0);
+    });
+
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
+
     let animationFrames = [];
     let currentFrame = 0;
     let animationInterval = null;
@@ -246,7 +284,7 @@
       const minScale = minScaledWidth / contentWidth;
       scale = Math.max(scale, minScale);
 
-      canvas.style.transform = `translate(-50%, -50%) scale(${scale})`;
+      canvas.style.transform = `translate(-50%, -60%) scale(${scale})`;
     }
   </script>
 
