@@ -74,7 +74,7 @@
     </div>
 
     <!-- Industries Header - Full width at top -->
-    <div class="absolute top-0 left-0 right-0 z-20">
+    <div class="z-20">
       <div class="grid grid-cols-5 gap-px bg-white bg-opacity-20">
         <div
           class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
@@ -185,20 +185,28 @@
     function scaleToFit() {
       const canvas = document.getElementById('ascii-canvas');
       const container = document.getElementById('ascii-container');
+      const isMobile = window.innerWidth < 768;
 
       // Reset scale to measure natural size
       canvas.style.fontSize = '10px';
 
-      const containerWidth = container.clientWidth; // Full container width
-      const containerHeight = container.clientHeight; // Full container height
+      const containerWidth = container.clientWidth;
+      const containerHeight = container.clientHeight;
       const contentWidth = canvas.scrollWidth;
       const contentHeight = canvas.scrollHeight;
 
-      const scaleX = containerWidth / contentWidth * 0.85;
+      // Mobile: scale to 1.0 (full width), Desktop: scale to 0.85
+      const widthMultiplier = isMobile ? 1.0 : 0.85;
+      const scaleX = containerWidth / contentWidth * widthMultiplier;
       const scaleY = containerHeight / contentHeight * 0.85;
-      const scale = Math.min(scaleX, scaleY, 2); // Max 2x scale
+      let scale = Math.min(scaleX, scaleY, 2); // Max 2x scale
 
-      canvas.style.transform = `translate(-50%, -60%) scale(${scale})`;
+      // Ensure minimum width for the scaled canvas
+      const minScaledWidth = 800;
+      const minScale = minScaledWidth / contentWidth;
+      scale = Math.max(scale, minScale);
+
+      canvas.style.transform = `translate(-50%, -50%) scale(${scale})`;
     }
   </script>
 
