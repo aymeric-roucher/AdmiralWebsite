@@ -145,6 +145,9 @@ function setupModel(model) {
     controls.target.set(0, 0, 0);
     controls.update();
 
+    // Apply initial rotation from sliders
+    updateShipRotation();
+
     updateStatus('✓ Model loaded! Adjust parameters and generate frames.');
     document.getElementById('generateBtn').disabled = false;
 }
@@ -212,31 +215,53 @@ async function generateFrames() {
         camera.position.set(0, 0, distance);
         camera.lookAt(0, 0, 0);
 
+        // Debug ship rotation on first frame
+        if (i === 0 && shipModel) {
+            console.log('Ship rotation during generation:', {
+                yaw: shipModel.rotation.y * 180 / Math.PI,
+                pitch: shipModel.rotation.x * 180 / Math.PI
+            });
+        }
+
         // Render with ASCII effect
         tempEffect.render(scene, camera);
 
         // Wait for render
         await new Promise(resolve => setTimeout(resolve, 50));
 
-        // Capture ASCII - each cell is a character, each row is a line
+        // Capture ASCII - AsciiEffect uses a single-cell table, look at innerHTML
         const table = tempEffect.domElement.querySelector('table');
         if (table) {
-            let asciiText = '';
-            const rows = table.querySelectorAll('tr');
-
-            rows.forEach((row, rowIndex) => {
-                const cells = row.querySelectorAll('td');
-                cells.forEach(cell => {
-                    // Each cell contains one character
-                    asciiText += cell.textContent || ' ';
-                });
-                // Add newline after each row (except last)
-                if (rowIndex < rows.length - 1) {
-                    asciiText += '\n';
+            // Debug first frame to understand structure
+            if (i === 0) {
+                console.log('===== DEBUG TABLE STRUCTURE =====');
+                const cell = table.querySelector('td');
+                if (cell) {
+                    console.log('Cell innerHTML length:', cell.innerHTML.length);
+                    console.log('Cell innerHTML preview:', cell.innerHTML.substring(0, 200));
+                    console.log('Cell has <br> tags:', cell.innerHTML.includes('<br>'));
                 }
-            });
+                console.log('================================');
+            }
 
-            animationFrames.push(asciiText);
+            const cell = table.querySelector('td');
+            if (cell) {
+                // Check if the cell uses <br> tags for line breaks
+                if (cell.innerHTML.includes('<br>')) {
+                    // Split by <br> tags and clean HTML entities
+                    const lines = cell.innerHTML.split(/<br\s*\/?>/i);
+                    const asciiText = lines.map(line => {
+                        // Create temporary element to decode HTML entities
+                        const temp = document.createElement('div');
+                        temp.innerHTML = line;
+                        return temp.textContent || '';
+                    }).join('\n');
+                    animationFrames.push(asciiText);
+                } else {
+                    // Fallback: just use textContent (might still be one line)
+                    animationFrames.push(cell.textContent || '');
+                }
+            }
         }
 
         updateStatus(`Generating frame ${i + 1}/${numFrames}...`);

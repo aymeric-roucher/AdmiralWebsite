@@ -1,6 +1,7 @@
 class AsciiPlayer {
     constructor() {
-        this.currentShip = 'pinnace';
+        // Default to 'victoria' (nao_victoria_galleon_ship.glb)
+        this.currentShip = 'victoria';
         this.animations = {};
         this.currentFrame = 0;
         this.isPlaying = true;
@@ -22,6 +23,11 @@ class AsciiPlayer {
         this.frameCounter = document.getElementById('frame-counter');
         this.totalFrames = document.getElementById('total-frames');
         this.status = document.getElementById('status');
+
+        // Reflect default ship in the dropdown
+        if (this.shipSelect) {
+            this.shipSelect.value = this.currentShip;
+        }
     }
 
     initEventListeners() {
@@ -45,6 +51,50 @@ class AsciiPlayer {
         this.restartBtn.addEventListener('click', () => {
             this.restart();
         });
+
+        const fileInput = document.getElementById('json-file');
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    try {
+                        const data = JSON.parse(reader.result);
+                        if (!data || !Array.isArray(data.frames)) {
+                            throw new Error('Invalid JSON: missing frames array');
+                        }
+                        // Normalize line endings
+                        data.frames = data.frames.map(f => typeof f === 'string' ? f.replace(/\r\n/g, '\n') : f);
+
+                        // Register as custom animation
+                        const name = data.ship_name || 'custom';
+                        const value = 'custom';
+                        this.animations[value] = {
+                            ship_name: name,
+                            num_frames: data.frames.length,
+                            frames: data.frames,
+                        };
+
+                        // Ensure dropdown has a custom option
+                        let opt = Array.from(this.shipSelect.options).find(o => o.value === value);
+                        if (!opt) {
+                            opt = document.createElement('option');
+                            opt.value = value;
+                            opt.textContent = 'Custom (loaded)';
+                            this.shipSelect.appendChild(opt);
+                        }
+
+                        this.switchShip(value);
+                        this.status.textContent = `Loaded animation: ${name}`;
+                    } catch (err) {
+                        console.error('Failed to load JSON', err);
+                        this.status.textContent = 'Error: invalid animation JSON';
+                    }
+                };
+                reader.readAsText(file);
+            });
+        }
     }
 
     async loadAnimation(shipName) {
@@ -58,6 +108,10 @@ class AsciiPlayer {
             }
 
             const data = await response.json();
+            // Normalize line endings in frames just in case
+            if (Array.isArray(data.frames)) {
+                data.frames = data.frames.map(f => (typeof f === 'string') ? f.replace(/\r\n/g, '\n') : f);
+            }
             this.animations[shipName] = data;
 
             this.currentFrame = 0;
@@ -65,14 +119,14 @@ class AsciiPlayer {
 
             this.status.textContent = `Loaded ${shipName}`;
 
+            // Always display the first frame immediately
+            this.displayFrame();
             if (this.isPlaying) {
                 this.play();
-            } else {
-                this.displayFrame();
             }
         } catch (error) {
             console.error('Error loading animation:', error);
-            this.asciiDisplay.textContent = `Error loading animation for ${shipName}.\n\nPlease run: python main.py --ship ${shipName}\n\nOr generate all ships: python main.py`;
+            this.asciiDisplay.textContent = `Error loading animation for ${shipName}.\n\nPlease run: uv run python main.py --ship ${shipName}\n\nOr generate all ships: uv run python main.py`;
             this.status.textContent = 'Error loading animation';
         }
     }

@@ -18,7 +18,7 @@
                 <label for="ship-select">Choose a Ship:</label>
                 <select id="ship-select">
                     <option value="pinnace">Ship Pinnace</option>
-                    <option value="victoria">Nao Victoria Galleon</option>
+                    <option value="victoria" selected>Nao Victoria Galleon</option>
                     <option value="frigate">Russian Frigate</option>
                 </select>
             </div>
@@ -31,6 +31,12 @@
             <div class="control-group">
                 <button id="play-pause-btn" class="btn">Pause</button>
                 <button id="restart-btn" class="btn">Restart</button>
+            </div>
+
+            <div class="control-group">
+                <label for="json-file">Load Animation JSON:</label>
+                <input id="json-file" type="file" accept="application/json">
+                <small>Tip: Use generator.html to create one</small>
             </div>
         </div>
 
