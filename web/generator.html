@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASCII Ship Animation Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .ascii-preview {
+      font-family: 'Courier New', monospace;
+      font-size: 8px;
+      line-height: 1.1;
+      white-space: pre;
+      background: black;
+      color: white;
+      padding: 10px;
+      overflow: auto;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-900 text-gray-300 overflow-hidden">
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 h-screen gap-4 p-4">
+
+    <!-- Left Panel: 3D Model Viewer -->
+    <div class="flex flex-col space-y-4">
+      <div class="bg-gray-800 p-4 rounded-lg">
+        <h2 class="text-xl font-bold text-white mb-4">3D Model Viewer</h2>
+        <div class="space-y-2">
+          <div>
+            <input id="file-selector" type="file" accept=".glb,.gltf,.stl" class="hidden">
+            <button onclick="document.getElementById('file-selector').click()"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              Load Ship Model
+            </button>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-sm">Ship Yaw:</label>
+              <input id="yawSlider" type="range" min="0" max="360" value="30" class="w-full">
+              <span id="yawValue" class="text-xs">30°</span>
+            </div>
+            <div>
+              <label class="text-sm">Ship Pitch:</label>
+              <input id="pitchSlider" type="range" min="-90" max="90" value="0" class="w-full">
+              <span id="pitchValue" class="text-xs">0°</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="viewer-container" class="flex-1 bg-black rounded-lg relative">
+        <div id="viewer-3d" class="w-full h-full"></div>
+        <!-- Camera info overlay -->
+        <div class="absolute top-4 left-4 bg-black bg-opacity-70 text-white p-3 rounded text-xs font-mono">
+          <div>Camera Distance: <span id="camDist" class="text-green-400">0</span></div>
+          <div>Camera Azimuth: <span id="camAzimuth" class="text-green-400">0°</span></div>
+          <div>Camera Elevation: <span id="camElevation" class="text-green-400">0°</span></div>
+          <div class="border-t border-gray-600 mt-2 pt-2">
+            <div>Ship Yaw: <span id="shipYawDisplay" class="text-cyan-400">30°</span></div>
+            <div>Ship Pitch: <span id="shipPitchDisplay" class="text-cyan-400">0°</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel: Animation Generator -->
+    <div class="flex flex-col space-y-4">
+      <div class="bg-gray-800 p-4 rounded-lg">
+        <h2 class="text-xl font-bold text-white mb-4">Animation Generator</h2>
+        <div class="space-y-3">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-sm">Frames:</label>
+              <input id="numFrames" type="number" value="30" min="10" max="60"
+                class="w-full bg-gray-700 rounded px-2 py-1">
+            </div>
+            <div>
+              <label class="text-sm">ASCII Width:</label>
+              <input id="asciiWidth" type="number" value="100" min="50" max="150"
+                class="w-full bg-gray-700 rounded px-2 py-1">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-sm">Start Distance:</label>
+              <input id="startDist" type="number" value="60" step="5"
+                class="w-full bg-gray-700 rounded px-2 py-1">
+            </div>
+            <div>
+              <label class="text-sm">End Distance:</label>
+              <input id="endDist" type="number" value="20" step="5"
+                class="w-full bg-gray-700 rounded px-2 py-1">
+            </div>
+          </div>
+
+          <div>
+            <label class="text-sm">ASCII Characters:</label>
+            <input id="asciiChars" type="text" value=" .:-+*=%@#"
+              class="w-full bg-gray-700 rounded px-2 py-1 font-mono">
+          </div>
+
+          <div class="flex space-x-2">
+            <button id="generateBtn" disabled
+              class="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white font-bold py-2 px-4 rounded flex-1">
+              Generate Frames
+            </button>
+            <button id="downloadBtn" disabled
+              class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-bold py-2 px-4 rounded flex-1">
+              Download JSON
+            </button>
+          </div>
+
+          <div id="status" class="text-sm bg-gray-700 p-2 rounded">
+            Load a ship model to begin...
+          </div>
+        </div>
+      </div>
+
+      <div class="flex-1 bg-gray-800 rounded-lg overflow-hidden flex flex-col">
+        <div class="p-2 bg-gray-700">
+          <h3 class="font-bold">Animation Preview</h3>
+          <div class="text-xs">Frame: <span id="previewFrame">0</span> / <span id="previewTotal">0</span></div>
+        </div>
+        <div id="ascii-preview" class="ascii-preview flex-1">
+          No frames generated yet...
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/effects/AsciiEffect.js"></script>
+
+  <script src="generator.js"></script>
+
+</body>
+</html>
