@@ -23,17 +23,19 @@ function init3DViewer() {
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
 
-    // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    // Lights - sharp sun-like lighting from front-right-up
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
     scene.add(ambientLight);
 
-    const pointLight1 = new THREE.PointLight(0xffffff, 1);
-    pointLight1.position.set(100, 100, 100);
-    scene.add(pointLight1);
+    // Main directional light (sun) from front-right-up
+    const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    sunLight.position.set(100, 80, 50);
+    scene.add(sunLight);
 
-    const pointLight2 = new THREE.PointLight(0xffffff, 0.5);
-    pointLight2.position.set(-100, -50, -100);
-    scene.add(pointLight2);
+    // Subtle fill light from opposite side
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.2);
+    fillLight.position.set(-50, 20, -30);
+    scene.add(fillLight);
 
     // Controls
     controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -74,6 +76,27 @@ function updateCameraDisplay() {
     // Calculate elevation (angle from XZ plane)
     const elevation = Math.asin(camera.position.y / distance) * 180 / Math.PI;
     document.getElementById('camElevation').textContent = elevation.toFixed(1) + '°';
+
+    // Update zoom slider to reflect current zoom level
+    updateZoomSliderFromCamera();
+}
+
+let baseDistance = null;
+
+function updateZoomSliderFromCamera() {
+    if (!camera) return;
+
+    // Store initial distance as base
+    if (baseDistance === null && shipModel) {
+        baseDistance = camera.position.length();
+    }
+
+    if (baseDistance) {
+        const currentDistance = camera.position.length();
+        const zoomValue = baseDistance / currentDistance;
+        document.getElementById('zoomSlider').value = zoomValue;
+        document.getElementById('zoomValue').textContent = zoomValue.toFixed(2) + 'x';
+    }
 }
 
 // Load ship model
@@ -119,13 +142,15 @@ function setupModel(model) {
 
     shipModel = model;
 
-    // Apply material to all meshes
+    // Apply material to all meshes with high contrast
     model.traverse((child) => {
         if (child.isMesh) {
             child.material = new THREE.MeshStandardMaterial({
-                color: 0x808080,
+                color: 0xaaaaaa,
                 flatShading: true,
-                side: THREE.DoubleSide
+                side: THREE.DoubleSide,
+                roughness: 0.8,
+                metalness: 0.2
             });
         }
     });
@@ -145,29 +170,13 @@ function setupModel(model) {
     controls.target.set(0, 0, 0);
     controls.update();
 
-    // Apply initial rotation from sliders
-    updateShipRotation();
+    // Set base distance for zoom calculations
+    baseDistance = camera.position.length();
+    document.getElementById('zoomSlider').value = 1;
+    document.getElementById('zoomValue').textContent = '1.00x';
 
     updateStatus('✓ Model loaded! Adjust parameters and generate frames.');
     document.getElementById('generateBtn').disabled = false;
-}
-
-// Update ship rotation from sliders
-function updateShipRotation() {
-    if (!shipModel) return;
-
-    const yawDeg = parseFloat(document.getElementById('yawSlider').value);
-    const pitchDeg = parseFloat(document.getElementById('pitchSlider').value);
-
-    const yaw = yawDeg * Math.PI / 180;
-    const pitch = pitchDeg * Math.PI / 180;
-
-    shipModel.rotation.y = yaw;
-    shipModel.rotation.x = pitch;
-
-    // Update display
-    document.getElementById('shipYawDisplay').textContent = yawDeg.toFixed(1) + '°';
-    document.getElementById('shipPitchDisplay').textContent = pitchDeg.toFixed(1) + '°';
 }
 
 // Generate ASCII frames
@@ -178,10 +187,10 @@ async function generateFrames() {
     }
 
     const numFrames = parseInt(document.getElementById('numFrames').value);
-    const startDist = parseFloat(document.getElementById('startDist').value);
-    const endDist = parseFloat(document.getElementById('endDist').value);
+    const travelDistance = parseFloat(document.getElementById('startDist').value);
     const asciiWidth = parseInt(document.getElementById('asciiWidth').value);
     const characters = document.getElementById('asciiChars').value;
+    const animStyle = document.querySelector('input[name="animStyle"]:checked').value;
 
     animationFrames = [];
     document.getElementById('generateBtn').disabled = true;
@@ -189,13 +198,26 @@ async function generateFrames() {
 
     // Create temporary ASCII effect for capturing
     const tempRenderer = new THREE.WebGLRenderer();
-    tempRenderer.setSize(800, 600);
+    const renderSize = 800; // Square render
+    tempRenderer.setSize(renderSize, renderSize);
+
+    // Calculate resolution - lower values = more characters
+    // Resolution is the size of each character cell in pixels
+    const resolution = asciiWidth / renderSize;
 
     const tempEffect = new THREE.AsciiEffect(tempRenderer, characters, {
         invert: true,
-        resolution: 0.15
+        resolution: resolution
     });
-    tempEffect.setSize(800, 600);
+    tempEffect.setSize(renderSize, renderSize);
+
+    // Create a temporary camera with the same settings as the main camera
+    const tempCamera = new THREE.PerspectiveCamera(
+        camera.fov,
+        1, // Square aspect ratio
+        camera.near,
+        camera.far
+    );
 
     // Add to DOM temporarily
     tempEffect.domElement.style.position = 'absolute';
@@ -206,25 +228,47 @@ async function generateFrames() {
     const originalPos = camera.position.clone();
     const originalRot = camera.rotation.clone();
 
+    // Store current camera position (keep it fixed)
+    const fixedCameraPos = camera.position.clone();
+    const fixedCameraTarget = controls.target.clone();
+
+    // Store original ship position
+    const originalShipPos = shipModel.position.clone();
+
+    // Get ship's forward direction based on its rotation
+    const shipForward = new THREE.Vector3(0, 0, -1); // Ship's default forward is -Z
+    shipForward.applyEuler(shipModel.rotation);
+    shipForward.normalize();
+
+    // Calculate offset distance (how far back/forward the ship moves)
+    const offsetDistance = travelDistance;
+
     for (let i = 0; i < numFrames; i++) {
-        // Calculate camera distance
         const t = i / (numFrames - 1);
-        const distance = startDist + (endDist - startDist) * t;
 
-        // Position camera
-        camera.position.set(0, 0, distance);
-        camera.lookAt(0, 0, 0);
-
-        // Debug ship rotation on first frame
-        if (i === 0 && shipModel) {
-            console.log('Ship rotation during generation:', {
-                yaw: shipModel.rotation.y * 180 / Math.PI,
-                pitch: shipModel.rotation.x * 180 / Math.PI
-            });
+        let shipOffset;
+        if (animStyle === 'stop') {
+            // Cosine ease-in: starts abrupt, smoothly decelerates to stop at center
+            const easedT = Math.sin(t * Math.PI / 2);
+            shipOffset = -offsetDistance + (offsetDistance * easedT);
+        } else {
+            // Pass through: linear motion from -offset to +offset
+            shipOffset = -offsetDistance + (2 * offsetDistance * t);
         }
 
-        // Render with ASCII effect
-        tempEffect.render(scene, camera);
+        // Position ship along its forward direction
+        const newShipPos = originalShipPos.clone().add(
+            shipForward.clone().multiplyScalar(-shipOffset)
+        );
+
+        shipModel.position.copy(newShipPos);
+
+        // Keep temp camera fixed at the same position as main camera
+        tempCamera.position.copy(fixedCameraPos);
+        tempCamera.lookAt(fixedCameraTarget);
+
+        // Render with ASCII effect using temp camera
+        tempEffect.render(scene, tempCamera);
 
         // Wait for render
         await new Promise(resolve => setTimeout(resolve, 50));
@@ -267,9 +311,10 @@ async function generateFrames() {
         updateStatus(`Generating frame ${i + 1}/${numFrames}...`);
     }
 
-    // Restore camera
+    // Restore camera and ship
     camera.position.copy(originalPos);
     camera.rotation.copy(originalRot);
+    shipModel.position.copy(originalShipPos);
     controls.update();
 
     // Cleanup
@@ -280,8 +325,34 @@ async function generateFrames() {
     document.getElementById('downloadBtn').disabled = false;
     document.getElementById('previewTotal').textContent = animationFrames.length;
 
+    // Automatically save to animation.json
+    saveAnimationJSON();
+
     // Start preview animation
     startPreview();
+}
+
+// Save animation to JSON file automatically
+function saveAnimationJSON() {
+    const data = {
+        ship_name: 'victoria',
+        num_frames: animationFrames.length,
+        frames: animationFrames,
+        generated_at: new Date().toISOString()
+    };
+
+    const jsonString = JSON.stringify(data, null, 2);
+    console.log('Generated animation JSON:');
+    console.log(jsonString);
+
+    // Auto-download as animation.json
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'animation.json';
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
 // Preview animation
@@ -291,8 +362,29 @@ function startPreview() {
     }
 
     let currentFrame = 0;
-    const preview = document.getElementById('ascii-preview');
+    const previewContainer = document.getElementById('ascii-preview');
+    const previewContent = document.getElementById('ascii-preview-content');
     const frameCounter = document.getElementById('previewFrame');
+
+    // Calculate scale to fit the content in the container
+    function scaleToFit() {
+        if (animationFrames.length === 0) return;
+
+        // Reset transform to measure natural size
+        previewContent.style.transform = 'scale(1)';
+        previewContent.style.fontSize = '8px';
+
+        const containerWidth = previewContainer.clientWidth;
+        const containerHeight = previewContainer.clientHeight;
+        const contentWidth = previewContent.scrollWidth;
+        const contentHeight = previewContent.scrollHeight;
+
+        const scaleX = containerWidth / contentWidth;
+        const scaleY = containerHeight / contentHeight;
+        const scale = Math.min(scaleX, scaleY); // Scale to fit exactly, no limits
+
+        previewContent.style.transform = `scale(${scale})`;
+    }
 
     previewInterval = setInterval(() => {
         if (animationFrames.length === 0) {
@@ -300,11 +392,16 @@ function startPreview() {
             return;
         }
 
-        preview.textContent = animationFrames[currentFrame];
+        previewContent.textContent = animationFrames[currentFrame];
         frameCounter.textContent = currentFrame + 1;
 
         currentFrame = (currentFrame + 1) % animationFrames.length;
-    }, 1000 / 15); // 15 FPS
+
+        // Scale on first frame
+        if (currentFrame === 1) {
+            setTimeout(scaleToFit, 10);
+        }
+    }, 1000 / 8); // 8 FPS (slower preview)
 }
 
 // Download JSON
@@ -338,18 +435,26 @@ document.getElementById('file-selector').addEventListener('change', (e) => {
     }
 });
 
-document.getElementById('yawSlider').addEventListener('input', (e) => {
-    document.getElementById('yawValue').textContent = e.target.value + '°';
-    updateShipRotation();
-});
-
-document.getElementById('pitchSlider').addEventListener('input', (e) => {
-    document.getElementById('pitchValue').textContent = e.target.value + '°';
-    updateShipRotation();
-});
-
 document.getElementById('generateBtn').addEventListener('click', generateFrames);
 document.getElementById('downloadBtn').addEventListener('click', downloadJSON);
+
+// Zoom slider control
+document.getElementById('zoomSlider').addEventListener('input', (e) => {
+    const zoomValue = parseFloat(e.target.value);
+    document.getElementById('zoomValue').textContent = zoomValue.toFixed(2) + 'x';
+
+    if (camera && baseDistance) {
+        // Adjust camera position based on zoom relative to base distance
+        const currentPos = camera.position.clone();
+        const newDistance = baseDistance / zoomValue;
+
+        currentPos.normalize();
+        currentPos.multiplyScalar(newDistance);
+
+        camera.position.copy(currentPos);
+        controls.update();
+    }
+});
 
 // Initialize
 init3DViewer();

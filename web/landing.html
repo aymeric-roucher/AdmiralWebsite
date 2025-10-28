@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admiral Labs - Secure AI for Mission Critical Operations</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+      background: #000000;
+      color: #ffffff;
+      overflow: hidden;
+    }
+
+    .ascii-canvas {
+      font-family: 'Courier New', monospace;
+      line-height: 1.0;
+      white-space: pre;
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .military-grid {
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+
+    .glow-text {
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    .border-military {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .mono-caps {
+      font-family: ui-monospace, 'Courier New', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .industry-text {
+      font-family: ui-monospace, 'Courier New', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #999999;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .industry-cell:hover .industry-text {
+      color: #ffffff;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Single Page Layout -->
+  <div class="h-screen flex flex-col military-grid relative overflow-hidden">
+
+    <!-- ASCII Animation Background -->
+    <div id="ascii-container" class="absolute inset-0 flex items-center justify-center opacity-40">
+      <pre id="ascii-canvas" class="ascii-canvas"></pre>
+    </div>
+
+    <!-- Industries Header - Full width at top -->
+    <div class="absolute top-0 left-0 right-0 z-20">
+      <div class="grid grid-cols-5 gap-px bg-white bg-opacity-20">
+        <div
+          class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
+          <div class="industry-text text-center">Commodity Trading</div>
+        </div>
+        <div
+          class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
+          <div class="industry-text text-center">Supply Chain</div>
+        </div>
+        <div
+          class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
+          <div class="industry-text text-center">TIC</div>
+        </div>
+        <div
+          class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
+          <div class="industry-text text-center">Industrials</div>
+        </div>
+        <div
+          class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
+          <div class="industry-text text-center">Defense</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero - Centered, takes full viewport height -->
+    <div class="relative z-10 flex items-center justify-center h-screen">
+      <div class="text-center">
+        <h1 class="text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight glow-text mb-8">
+          Admiral Labs
+        </h1>
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-light tracking-tight leading-tight">
+          Secure AI for<br>Mission Critical<br>Operations
+        </h2>
+      </div>
+    </div>
+
+    <!-- Capabilities - Rows above footer -->
+    <div class="absolute bottom-24 left-1/2 transform -translate-x-1/2 z-20 w-full max-w-4xl px-8">
+      <div class="grid grid-cols-4 gap-8">
+        <div class="flex items-center justify-center">
+          <div class="text-sm text-center">See Clearly</div>
+        </div>
+        <div class="flex items-center justify-center">
+          <div class="text-sm text-center">Drive Top-Line Growth</div>
+        </div>
+        <div class="flex items-center justify-center">
+          <div class="text-sm text-center">Automate with Confidence</div>
+        </div>
+        <div class="flex items-center justify-center">
+          <div class="text-sm text-center">Expand Capacity, not Headcount</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer - Absolute positioned at bottom -->
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 text-center">
+      <div class="flex justify-center gap-8 mb-3 mono-caps text-xs" style="color: #999999;">
+        <span>New York</span>
+        <span>—</span>
+        <span>London</span>
+      </div>
+      <a href="mailto:contact@admirallabs.com" class="text-xs hover:text-white transition-colors duration-300"
+        style="color: #999999; font-family: ui-monospace, 'Courier New', monospace;">
+        contact@admirallabs.com
+      </a>
+    </div>
+  </div>
+
+  <script>
+    let animationFrames = [];
+    let currentFrame = 0;
+    let animationInterval = null;
+
+    // Load animation data
+    fetch('../animation.json')
+      .then(response => response.json())
+      .then(data => {
+        animationFrames = data.frames;
+        startAnimation();
+      })
+      .catch(error => {
+        console.error('Error loading animation:', error);
+        document.getElementById('ascii-canvas').textContent = 'Animation loading...';
+      });
+
+    function startAnimation() {
+      if (animationFrames.length === 0) return;
+
+      const canvas = document.getElementById('ascii-canvas');
+      const container = document.getElementById('ascii-container');
+
+      // Start animation loop
+      animationInterval = setInterval(() => {
+        canvas.textContent = animationFrames[currentFrame];
+
+        // Scale to fit on first frame
+        if (currentFrame === 0) {
+          scaleToFit();
+        }
+
+        currentFrame = (currentFrame + 1) % animationFrames.length;
+      }, 1000 / 12); // 12 FPS
+
+      // Rescale on window resize
+      window.addEventListener('resize', scaleToFit);
+    }
+
+    function scaleToFit() {
+      const canvas = document.getElementById('ascii-canvas');
+      const container = document.getElementById('ascii-container');
+
+      // Reset scale to measure natural size
+      canvas.style.transform = 'translate(-50%, -50%) scale(1)';
+      canvas.style.fontSize = '10px';
+
+      const containerWidth = container.clientWidth; // Full container width
+      const containerHeight = container.clientHeight; // Full container height
+      const contentWidth = canvas.scrollWidth;
+      const contentHeight = canvas.scrollHeight;
+
+      const scaleX = containerWidth / contentWidth;
+      const scaleY = containerHeight / contentHeight;
+      const scale = Math.min(scaleX, scaleY, 2); // Max 2x scale
+
+      canvas.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    }
+  </script>
+
+</body>
+
+</html>

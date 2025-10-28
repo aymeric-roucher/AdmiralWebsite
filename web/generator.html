@@ -10,12 +10,23 @@
     .ascii-preview {
       font-family: 'Courier New', monospace;
       font-size: 8px;
-      line-height: 1.1;
+      line-height: 1.0;
       white-space: pre;
       background: black;
       color: white;
-      padding: 10px;
-      overflow: auto;
+      padding: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+    .ascii-preview-content {
+      transform-origin: center center;
+      white-space: pre;
+      max-width: 100%;
+      max-height: 100%;
     }
   </style>
 </head>
@@ -36,32 +47,23 @@
               Load Ship Model
             </button>
           </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="text-sm">Ship Yaw:</label>
-              <input id="yawSlider" type="range" min="0" max="360" value="30" class="w-full">
-              <span id="yawValue" class="text-xs">30°</span>
-            </div>
-            <div>
-              <label class="text-sm">Ship Pitch:</label>
-              <input id="pitchSlider" type="range" min="-90" max="90" value="0" class="w-full">
-              <span id="pitchValue" class="text-xs">0°</span>
-            </div>
+          <div>
+            <label class="text-sm">Camera Zoom:</label>
+            <input id="zoomSlider" type="range" min="0.1" max="3" step="0.01" value="1" class="w-full">
+            <span id="zoomValue" class="text-xs">1.00x</span>
           </div>
         </div>
       </div>
 
-      <div id="viewer-container" class="flex-1 bg-black rounded-lg relative">
-        <div id="viewer-3d" class="w-full h-full"></div>
+      <div class="flex-1 flex items-center justify-center">
+        <div id="viewer-container" class="bg-black rounded-lg relative" style="width: 100%; aspect-ratio: 1/1; max-width: min(100%, calc(100vh - 200px)); max-height: calc(100vh - 200px);">
+          <div id="viewer-3d" class="w-full h-full"></div>
         <!-- Camera info overlay -->
         <div class="absolute top-4 left-4 bg-black bg-opacity-70 text-white p-3 rounded text-xs font-mono">
           <div>Camera Distance: <span id="camDist" class="text-green-400">0</span></div>
           <div>Camera Azimuth: <span id="camAzimuth" class="text-green-400">0°</span></div>
           <div>Camera Elevation: <span id="camElevation" class="text-green-400">0°</span></div>
-          <div class="border-t border-gray-600 mt-2 pt-2">
-            <div>Ship Yaw: <span id="shipYawDisplay" class="text-cyan-400">30°</span></div>
-            <div>Ship Pitch: <span id="shipPitchDisplay" class="text-cyan-400">0°</span></div>
-          </div>
+        </div>
         </div>
       </div>
     </div>
@@ -74,26 +76,33 @@
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="text-sm">Frames:</label>
-              <input id="numFrames" type="number" value="30" min="10" max="60"
+              <input id="numFrames" type="number" value="120" min="10" max="200"
                 class="w-full bg-gray-700 rounded px-2 py-1">
             </div>
             <div>
               <label class="text-sm">ASCII Width:</label>
-              <input id="asciiWidth" type="number" value="100" min="50" max="150"
+              <input id="asciiWidth" type="number" value="200" min="50" max="500"
                 class="w-full bg-gray-700 rounded px-2 py-1">
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="text-sm">Start Distance:</label>
-              <input id="startDist" type="number" value="60" step="5"
-                class="w-full bg-gray-700 rounded px-2 py-1">
-            </div>
-            <div>
-              <label class="text-sm">End Distance:</label>
-              <input id="endDist" type="number" value="20" step="5"
-                class="w-full bg-gray-700 rounded px-2 py-1">
+          <div>
+            <label class="text-sm">Travel Distance (ship movement offset):</label>
+            <input id="startDist" type="number" value="60" step="5"
+              class="w-full bg-gray-700 rounded px-2 py-1">
+          </div>
+
+          <div>
+            <label class="text-sm">Animation Style:</label>
+            <div class="flex gap-4 mt-1">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="animStyle" value="stop" checked class="cursor-pointer">
+                <span class="text-xs">Stop in middle</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="animStyle" value="passthrough" class="cursor-pointer">
+                <span class="text-xs">Pass through</span>
+              </label>
             </div>
           </div>
 
@@ -120,13 +129,13 @@
         </div>
       </div>
 
-      <div class="flex-1 bg-gray-800 rounded-lg overflow-hidden flex flex-col">
-        <div class="p-2 bg-gray-700">
+      <div class="flex-1 bg-gray-800 rounded-lg overflow-hidden flex flex-col" style="min-height: 0; max-height: calc(100vh - 300px);">
+        <div class="p-2 bg-gray-700 flex-shrink-0">
           <h3 class="font-bold">Animation Preview</h3>
           <div class="text-xs">Frame: <span id="previewFrame">0</span> / <span id="previewTotal">0</span></div>
         </div>
-        <div id="ascii-preview" class="ascii-preview flex-1">
-          No frames generated yet...
+        <div id="ascii-preview" class="ascii-preview flex-1" style="min-height: 0; overflow: hidden;">
+          <div id="ascii-preview-content" class="ascii-preview-content">No frames generated yet...</div>
         </div>
       </div>
     </div>
