@@ -133,3 +133,7 @@ All models are centered and scaled automatically on load.
 ## Credits
 
 ASCII generation adapted from [STL-to-ASCII-Generator](https://github.com/AndrewSink/STL-to-ASCII-Generator/)
+
+Sources: 
+- 3D Model from [Sketchfab](https://sketchfab.com/3d-models/russian-chebeque-minerva-634837dd7f314aefa848e4c16fa5304d)
+- Edited [here](https://threejs.org/editor/)
