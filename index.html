@@ -133,6 +133,14 @@
       </div>
     </div>
 
+    <!-- Static Mode Checkbox - Top right -->
+    <div class="absolute top-20 right-8 z-20">
+      <label class="flex items-center gap-2 cursor-pointer text-xs" style="color: #999999; font-family: 'JetBrains Mono', ui-monospace, 'Courier New', monospace;">
+        <input type="checkbox" id="static-mode" class="cursor-pointer">
+        <span>STATIC</span>
+      </label>
+    </div>
+
     <!-- Footer - Absolute positioned at bottom -->
     <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 text-center">
       <div class="flex justify-center gap-8 mb-3 mono-caps text-xs" style="color: #999999;">
@@ -151,6 +159,9 @@
     let animationFrames = [];
     let currentFrame = 0;
     let animationInterval = null;
+    let staticMode = false;
+    let baseFrame = '';
+    const ASCII_RAMP = ' .:-+*=%@#';
 
     // Load animation data
     fetch('animation.json')
@@ -164,22 +175,47 @@
         document.getElementById('ascii-canvas').textContent = 'Animation loading...';
       });
 
+    // Static mode checkbox handler
+    document.getElementById('static-mode').addEventListener('change', (e) => {
+      staticMode = e.target.checked;
+      if (staticMode) {
+        // Save last frame as base
+        baseFrame = animationFrames[animationFrames.length - 1];
+      }
+    });
+
+    function applyStaticEffect(frame) {
+      return frame.split('\n').map(line => {
+        let inStreak = false, offset = 0;
+        return line.split('').map(char => {
+          if (char === ' ') return (inStreak = false, char);
+          if (!inStreak && Math.random() < 0.01) (inStreak = true, offset = Math.random() < 0.5 ? -1 : 1);
+          else if (inStreak && Math.random() > 0.8) inStreak = false;
+          if (!inStreak) return char;
+          const idx = ASCII_RAMP.indexOf(char);
+          return idx === -1 ? char : ASCII_RAMP[Math.max(0, Math.min(ASCII_RAMP.length - 1, idx + offset))];
+        }).join('');
+      }).join('\n');
+    }
+
     function startAnimation() {
       if (animationFrames.length === 0) return;
 
       const canvas = document.getElementById('ascii-canvas');
       const container = document.getElementById('ascii-container');
 
+      // Set initial frame and scale
+      canvas.textContent = animationFrames[0];
+      scaleToFit();
+
       // Start animation loop
       animationInterval = setInterval(() => {
-        canvas.textContent = animationFrames[currentFrame];
-
-        // Scale to fit on first frame
-        if (currentFrame === 0) {
-          scaleToFit();
+        if (staticMode) {
+          canvas.textContent = applyStaticEffect(baseFrame);
+        } else {
+          canvas.textContent = animationFrames[currentFrame];
+          currentFrame = (currentFrame + 1) % animationFrames.length;
         }
-
-        currentFrame = (currentFrame + 1) % animationFrames.length;
       }, 1000 / 12); // 12 FPS
 
       // Rescale on window resize
