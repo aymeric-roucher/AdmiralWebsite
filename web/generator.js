@@ -23,19 +23,21 @@ function init3DViewer() {
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
 
-    // Lights - sharp sun-like lighting from front-right-up
+    // Lights - sharp sun-like lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
     scene.add(ambientLight);
 
-    // Main directional light (sun) from front-right-up
-    const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
-    sunLight.position.set(100, 80, 50);
-    scene.add(sunLight);
+    // Main directional light (sun) - will be positioned by controls
+    window.sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    scene.add(window.sunLight);
 
     // Subtle fill light from opposite side
     const fillLight = new THREE.DirectionalLight(0xffffff, 0.2);
     fillLight.position.set(-50, 20, -30);
     scene.add(fillLight);
+
+    // Initialize light position
+    updateLightPosition();
 
     // Controls
     controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -172,8 +174,19 @@ function setupModel(model) {
 
     // Set base distance for zoom calculations
     baseDistance = camera.position.length();
-    document.getElementById('zoomSlider').value = 1;
-    document.getElementById('zoomValue').textContent = '1.00x';
+
+    // Apply default zoom
+    const defaultZoom = 2.05;
+    document.getElementById('zoomSlider').value = defaultZoom;
+    document.getElementById('zoomValue').textContent = defaultZoom.toFixed(2) + 'x';
+
+    // Apply zoom to camera
+    const currentPos = camera.position.clone();
+    const newDistance = baseDistance / defaultZoom;
+    currentPos.normalize();
+    currentPos.multiplyScalar(newDistance);
+    camera.position.copy(currentPos);
+    controls.update();
 
     updateStatus('✓ Model loaded! Adjust parameters and generate frames.');
     document.getElementById('generateBtn').disabled = false;
@@ -454,6 +467,32 @@ document.getElementById('zoomSlider').addEventListener('input', (e) => {
         camera.position.copy(currentPos);
         controls.update();
     }
+});
+
+// Light position controls
+function updateLightPosition() {
+    if (!window.sunLight) return;
+
+    const azimuth = parseFloat(document.getElementById('lightAzimuth').value) * Math.PI / 180;
+    const elevation = parseFloat(document.getElementById('lightElevation').value) * Math.PI / 180;
+
+    // Convert spherical to cartesian coordinates
+    const distance = 100;
+    const x = distance * Math.cos(elevation) * Math.sin(azimuth);
+    const y = distance * Math.sin(elevation);
+    const z = distance * Math.cos(elevation) * Math.cos(azimuth);
+
+    window.sunLight.position.set(x, y, z);
+}
+
+document.getElementById('lightAzimuth').addEventListener('input', (e) => {
+    document.getElementById('lightAzimuthValue').textContent = e.target.value + '°';
+    updateLightPosition();
+});
+
+document.getElementById('lightElevation').addEventListener('input', (e) => {
+    document.getElementById('lightElevationValue').textContent = e.target.value + '°';
+    updateLightPosition();
 });
 
 // Initialize
