@@ -5,6 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admiral Labs - Secure AI for Mission Critical Operations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
+    rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
@@ -15,7 +19,7 @@
     }
 
     .ascii-canvas {
-      font-family: 'Courier New', monospace;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
       line-height: 1.2;
       white-space: pre;
       color: #ffffff;
@@ -42,13 +46,13 @@
     }
 
     .mono-caps {
-      font-family: ui-monospace, 'Courier New', monospace;
+      font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', 'Courier New', monospace;
       text-transform: uppercase;
       letter-spacing: 0.1em;
     }
 
     .industry-text {
-      font-family: ui-monospace, 'Courier New', monospace;
+      font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', 'Courier New', monospace;
       text-transform: uppercase;
       letter-spacing: 0.15em;
       color: #999999;
@@ -69,7 +73,7 @@
   <div class="h-screen flex flex-col military-grid relative overflow-hidden">
 
     <!-- ASCII Animation Background -->
-    <div id="ascii-container" class="absolute inset-0 flex items-center justify-center opacity-40">
+    <div id="ascii-container" class="absolute inset-0 flex items-center justify-center opacity-30">
       <pre id="ascii-canvas" class="ascii-canvas"></pre>
     </div>
 
@@ -115,16 +119,16 @@
     <div class="absolute bottom-32 left-1/2 transform -translate-x-1/2 z-20 w-full max-w-4xl px-8">
       <div class="grid grid-cols-4 gap-8">
         <div class="flex items-center justify-center">
-          <div class="text-sm text-center">See Clearly</div>
+          <div class="text-md text-center">See Clearly</div>
         </div>
         <div class="flex items-center justify-center">
-          <div class="text-sm text-center">Drive Top-Line Growth</div>
+          <div class="text-md text-center">Drive Top-Line Growth</div>
         </div>
         <div class="flex items-center justify-center">
-          <div class="text-sm text-center">Automate with Confidence</div>
+          <div class="text-md text-center">Automate with Confidence</div>
         </div>
         <div class="flex items-center justify-center">
-          <div class="text-sm text-center">Expand Capacity, not Headcount</div>
+          <div class="text-md text-center">Expand Capacity, not Headcount</div>
         </div>
       </div>
     </div>
@@ -137,7 +141,7 @@
         <span>London</span>
       </div>
       <a href="mailto:contact@admirallabs.com" class="text-xs hover:text-white transition-colors duration-300"
-        style="color: #999999; font-family: ui-monospace, 'Courier New', monospace;">
+        style="color: #999999; font-family: 'JetBrains Mono', ui-monospace, 'Courier New', monospace;">
         contact@admirallabs.com
       </a>
     </div>
