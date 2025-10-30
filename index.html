@@ -33,7 +33,7 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -40%);
+      transform: translate(-45%, -60%);
     }
 
     .military-grid {
@@ -319,11 +319,11 @@
       let scale = Math.min(scaleX, scaleY, 2); // Max 2x scale
 
       // Ensure minimum width for the scaled canvas
-      const minScaledWidth = 800;
+      const minScaledWidth = 700;
       const minScale = minScaledWidth / contentWidth;
       scale = Math.max(scale, minScale);
 
-      canvas.style.transform = `translate(-50%, -60%) scale(${scale})`;
+      canvas.style.transform = `translate(-45%, -60%) scale(${scale})`;
     }
   </script>
 
