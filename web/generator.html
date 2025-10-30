@@ -102,17 +102,31 @@
               class="w-full bg-gray-700 rounded px-2 py-1">
           </div>
 
-          <div>
-            <label class="text-sm">Animation Style:</label>
-            <div class="flex gap-4 mt-1">
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="radio" name="animStyle" value="stop" checked class="cursor-pointer">
-                <span class="text-xs">Stop in middle</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="radio" name="animStyle" value="passthrough" class="cursor-pointer">
-                <span class="text-xs">Pass through</span>
-              </label>
+          <div class="flex gap-6 items-start">
+            <div>
+              <label class="text-sm">Animation Style:</label>
+              <div class="flex gap-4 mt-1">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="animStyle" value="stop" checked class="cursor-pointer">
+                  <span class="text-xs">Stop in middle</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="animStyle" value="passthrough" class="cursor-pointer">
+                  <span class="text-xs">Pass through</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="animStyle" value="rocking" class="cursor-pointer">
+                  <span class="text-xs">Gentle rocking</span>
+                </label>
+              </div>
+            </div>
+
+            <div id="rockingAmplitude" style="display: none;">
+              <label class="text-sm">Rocking Amplitude:</label>
+              <div class="flex items-center gap-2 mt-1">
+                <input id="rockingAmplitudeSlider" type="range" min="0" max="2" step="0.1" value="1" class="w-32">
+                <span id="rockingAmplitudeValue" class="text-xs">1.0x</span>
+              </div>
             </div>
           </div>
 

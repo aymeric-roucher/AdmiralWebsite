@@ -132,12 +132,22 @@
       </div>
     </div>
 
-    <!-- Static Mode Checkbox - Top right -->
-    <div class="absolute top-20 right-8 z-20">
+    <!-- Animation Mode Selector - Top right -->
+    <div class="absolute top-20 right-8 z-20 flex flex-col gap-2">
       <label class="flex items-center gap-2 cursor-pointer text-xs"
         style="color: #999999; font-family: 'JetBrains Mono', ui-monospace, 'Courier New', monospace;">
-        <input type="checkbox" id="static-mode" class="cursor-pointer">
-        <span>STATIC</span>
+        <input type="radio" name="animation-mode" value="arrival" checked class="cursor-pointer">
+        <span>ARRIVAL</span>
+      </label>
+      <label class="flex items-center gap-2 cursor-pointer text-xs"
+        style="color: #999999; font-family: 'JetBrains Mono', ui-monospace, 'Courier New', monospace;">
+        <input type="radio" name="animation-mode" value="rocking" class="cursor-pointer">
+        <span>ROCKING</span>
+      </label>
+      <label class="flex items-center gap-2 cursor-pointer text-xs"
+        style="color: #999999; font-family: 'JetBrains Mono', ui-monospace, 'Courier New', monospace;">
+        <input type="radio" name="animation-mode" value="arrival-rocking" class="cursor-pointer">
+        <span>ARRIVAL + ROCKING</span>
       </label>
     </div>
 
@@ -195,46 +205,65 @@
     window.scrollTo(0, 0);
 
     let animationFrames = [];
+    let rockingFrames = [];
     let currentFrame = 0;
     let animationInterval = null;
-    let staticMode = false;
-    let baseFrame = '';
-    const ASCII_RAMP = ' .:-+*=%@#';
+    let currentAnimationMode = 'arrival';
+    let isInArrivalPhase = true;
+    let arrivalFrames = [];
 
-    // Load animation data
-    fetch('animation.json')
-      .then(response => response.json())
-      .then(data => {
-        animationFrames = data.frames;
-        startAnimation();
-      })
-      .catch(error => {
-        console.error('Error loading animation:', error);
-        document.getElementById('ascii-canvas').textContent = 'Animation loading...';
-      });
+    // Load animation data based on mode
+    function loadAnimation(mode) {
+      if (mode === 'arrival-rocking') {
+        // Load both animations for chaining
+        Promise.all([
+          fetch('animation_arrival_trimmed.json').then(r => r.json()),
+          fetch('animation_rocking_trimmed.json').then(r => r.json())
+        ])
+          .then(([arrivalData, rockingData]) => {
+            arrivalFrames = arrivalData.frames;
+            rockingFrames = rockingData.frames;
+            animationFrames = arrivalFrames;
+            currentFrame = 0;
+            isInArrivalPhase = true;
+            if (!animationInterval) {
+              startAnimation();
+            }
+          })
+          .catch(error => {
+            console.error('Error loading animations:', error);
+            document.getElementById('ascii-canvas').textContent = 'Animation loading...';
+          });
+      } else {
+        const filename = mode === 'rocking' ? 'animation_rocking_trimmed.json' : 'animation_arrival_trimmed.json';
 
-    // Static mode checkbox handler
-    document.getElementById('static-mode').addEventListener('change', (e) => {
-      staticMode = e.target.checked;
-      if (staticMode) {
-        // Save last frame as base
-        baseFrame = animationFrames[animationFrames.length - 1];
+        fetch(filename)
+          .then(response => response.json())
+          .then(data => {
+            animationFrames = data.frames;
+            currentFrame = 0;
+            isInArrivalPhase = false;
+            if (!animationInterval) {
+              startAnimation();
+            }
+          })
+          .catch(error => {
+            console.error('Error loading animation:', error);
+            document.getElementById('ascii-canvas').textContent = 'Animation loading...';
+          });
       }
+    }
+
+    // Animation mode radio button handlers
+    document.querySelectorAll('input[name="animation-mode"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        currentAnimationMode = e.target.value;
+        loadAnimation(currentAnimationMode);
+      });
     });
 
-    function applyStaticEffect(frame) {
-      return frame.split('\n').map(line => {
-        let inStreak = false, offset = 0;
-        return line.split('').map(char => {
-          if (char === ' ') return (inStreak = false, char);
-          if (!inStreak && Math.random() < 0.01) (inStreak = true, offset = Math.random() < 0.5 ? -1 : 1);
-          else if (inStreak && Math.random() > 0.8) inStreak = false;
-          if (!inStreak) return char;
-          const idx = ASCII_RAMP.indexOf(char);
-          return idx === -1 ? char : ASCII_RAMP[Math.max(0, Math.min(ASCII_RAMP.length - 1, idx + offset))];
-        }).join('');
-      }).join('\n');
-    }
+    // Load initial animation
+    loadAnimation(currentAnimationMode);
 
     function startAnimation() {
       if (animationFrames.length === 0) return;
@@ -248,11 +277,21 @@
 
       // Start animation loop
       animationInterval = setInterval(() => {
-        if (staticMode) {
-          canvas.textContent = applyStaticEffect(baseFrame);
+        canvas.textContent = animationFrames[currentFrame];
+        currentFrame = (currentFrame + 1);
+
+        // Handle chaining for arrival-rocking mode
+        if (currentAnimationMode === 'arrival-rocking' && isInArrivalPhase) {
+          // Check if arrival animation finished
+          if (currentFrame >= arrivalFrames.length) {
+            // Switch to rocking animation
+            animationFrames = rockingFrames;
+            currentFrame = 0;
+            isInArrivalPhase = false;
+          }
         } else {
-          canvas.textContent = animationFrames[currentFrame];
-          currentFrame = (currentFrame + 1) % animationFrames.length;
+          // Normal looping for other modes
+          currentFrame = currentFrame % animationFrames.length;
         }
       }, 1000 / 12); // 12 FPS
 
@@ -274,9 +313,9 @@
       const contentHeight = canvas.scrollHeight;
 
       // Mobile: scale to 1.0 (full width), Desktop: scale to 0.85
-      const widthMultiplier = isMobile ? 1.0 : 0.85;
+      const widthMultiplier = isMobile ? 1.0 : 0.6;
       const scaleX = containerWidth / contentWidth * widthMultiplier;
-      const scaleY = containerHeight / contentHeight * 0.85;
+      const scaleY = containerHeight / contentHeight * 0.6;
       let scale = Math.min(scaleX, scaleY, 2); // Max 2x scale
 
       // Ensure minimum width for the scaled canvas

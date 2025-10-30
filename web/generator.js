@@ -164,10 +164,20 @@ function setupModel(model) {
 
     scene.add(model);
 
-    // Update camera
+    // Update camera with specific azimuth and elevation
     const size = box.getSize(new THREE.Vector3());
     const maxDim = Math.max(size.x, size.y, size.z);
-    camera.position.set(0, maxDim, maxDim * 2);
+
+    // Set camera position using azimuth=54.3° and elevation=-9°
+    const azimuthRad = 54.3 * Math.PI / 180;
+    const elevationRad = -9 * Math.PI / 180;
+    const distance = maxDim * 2.5;
+
+    const x = distance * Math.cos(elevationRad) * Math.sin(azimuthRad);
+    const y = distance * Math.sin(elevationRad);
+    const z = distance * Math.cos(elevationRad) * Math.cos(azimuthRad);
+
+    camera.position.set(x, y, z);
     camera.lookAt(0, 0, 0);
     controls.target.set(0, 0, 0);
     controls.update();
@@ -245,8 +255,9 @@ async function generateFrames() {
     const fixedCameraPos = camera.position.clone();
     const fixedCameraTarget = controls.target.clone();
 
-    // Store original ship position
+    // Store original ship position and rotation
     const originalShipPos = shipModel.position.clone();
+    const originalShipRot = shipModel.rotation.clone();
 
     // Get ship's forward direction based on its rotation
     const shipForward = new THREE.Vector3(0, 0, -1); // Ship's default forward is -Z
@@ -264,9 +275,12 @@ async function generateFrames() {
             // Cosine ease-in: starts abrupt, smoothly decelerates to stop at center
             const easedT = Math.sin(t * Math.PI / 2);
             shipOffset = -offsetDistance + (offsetDistance * easedT);
-        } else {
+        } else if (animStyle === 'passthrough') {
             // Pass through: linear motion from -offset to +offset
             shipOffset = -offsetDistance + (2 * offsetDistance * t);
+        } else {
+            // Rocking: no horizontal movement
+            shipOffset = 0;
         }
 
         // Position ship along its forward direction
@@ -275,6 +289,36 @@ async function generateFrames() {
         );
 
         shipModel.position.copy(newShipPos);
+
+        // Apply rocking rotation if in rocking mode
+        if (animStyle === 'rocking') {
+            // Get amplitude factor from slider
+            const amplitudeFactor = parseFloat(document.getElementById('rockingAmplitudeSlider').value);
+
+            // Roll: simple sinusoidal (side-to-side rocking)
+            const rollAngle = amplitudeFactor * 0.02 * Math.sin(2 * Math.PI * t);
+
+            // Pitch: asymmetric (nose up/down with slow rise, faster fall)
+            const pitchAngle = amplitudeFactor * 0.03 * (Math.sin(2 * Math.PI * t) - 0.3 * Math.sin(4 * Math.PI * t));
+
+            // Yaw: none
+            const yawAngle = 0;
+
+            // Vertical movement: follows same asymmetric law as pitch
+            const verticalOffset = amplitudeFactor * 2 * (Math.sin(2 * Math.PI * t) - 0.3 * Math.sin(4 * Math.PI * t));
+
+            shipModel.rotation.set(
+                originalShipRot.x + pitchAngle,
+                originalShipRot.y + yawAngle,
+                originalShipRot.z + rollAngle
+            );
+
+            // Apply vertical movement
+            newShipPos.y += verticalOffset;
+        } else {
+            // Reset rotation for other animation styles
+            shipModel.rotation.copy(originalShipRot);
+        }
 
         // Keep temp camera fixed at the same position as main camera
         tempCamera.position.copy(fixedCameraPos);
@@ -328,6 +372,7 @@ async function generateFrames() {
     camera.position.copy(originalPos);
     camera.rotation.copy(originalRot);
     shipModel.position.copy(originalShipPos);
+    shipModel.rotation.copy(originalShipRot);
     controls.update();
 
     // Cleanup
@@ -493,6 +538,24 @@ document.getElementById('lightAzimuth').addEventListener('input', (e) => {
 document.getElementById('lightElevation').addEventListener('input', (e) => {
     document.getElementById('lightElevationValue').textContent = e.target.value + '°';
     updateLightPosition();
+});
+
+// Rocking amplitude slider
+document.getElementById('rockingAmplitudeSlider').addEventListener('input', (e) => {
+    const value = parseFloat(e.target.value);
+    document.getElementById('rockingAmplitudeValue').textContent = value.toFixed(1) + 'x';
+});
+
+// Show/hide rocking amplitude control based on animation style
+document.querySelectorAll('input[name="animStyle"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+        const rockingControl = document.getElementById('rockingAmplitude');
+        if (e.target.value === 'rocking') {
+            rockingControl.style.display = 'block';
+        } else {
+            rockingControl.style.display = 'none';
+        }
+    });
 });
 
 // Initialize

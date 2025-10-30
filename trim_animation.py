@@ -22,10 +22,17 @@ def trim_frame(frame_text, top_lines=20, bottom_lines=20):
     return '\n'.join(trimmed_lines)
 
 def main():
-    input_file = 'animation_2.json'
-    output_file = 'animation_3.json'
-    top_trim = 25
-    bottom_trim = 20
+    if len(sys.argv) < 2:
+        print("Usage: trim_animation.py <input_file> [top_trim] [bottom_trim]")
+        print("Example: trim_animation.py animation_arrival.json 25 20")
+        sys.exit(1)
+
+    input_file = sys.argv[1]
+    top_trim = int(sys.argv[2]) if len(sys.argv) > 2 else 25
+    bottom_trim = int(sys.argv[3]) if len(sys.argv) > 3 else 20
+
+    # Generate output filename by adding _trimmed before .json
+    output_file = input_file.replace('.json', '_trimmed.json')
 
     # Load input animation
     print(f"Loading {input_file}...")
