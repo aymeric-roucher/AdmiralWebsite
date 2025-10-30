@@ -30,10 +30,6 @@
       white-space: pre;
       color: #ffffff;
       text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -40%);
     }
 
     .military-grid {
@@ -75,122 +71,92 @@
 
 <body>
 
-  <!-- Scrollable Layout -->
-  <div class="flex flex-col military-grid relative">
+  <!-- Left Sidebar -->
+  <div class="fixed left-0 top-0 h-screen w-64 bg-black border-r border-white border-opacity-20 z-30 flex flex-col justify-center px-8 py-12">
+    <div class="space-y-8">
+      <!-- Subtitle -->
+      <h2 class="text-lg font-light tracking-tight leading-tight" style="font-family: 'JetBrains Mono', ui-monospace, 'Courier New', monospace;">
+        Secure AI for Mission Critical Operations
+      </h2>
 
-    <!-- ASCII Animation Background -->
-    <div id="ascii-container" class="absolute inset-0 flex items-center justify-center opacity-30">
-      <pre id="ascii-canvas" class="ascii-canvas"></pre>
+      <!-- Industries List -->
+      <nav class="space-y-4">
+        <a href="#" class="block industry-text hover:text-white transition-colors duration-300">
+          Commodity Trading
+        </a>
+        <a href="#" class="block industry-text hover:text-white transition-colors duration-300">
+          Supply Chain
+        </a>
+        <a href="#" class="block industry-text hover:text-white transition-colors duration-300">
+          TIC
+        </a>
+        <a href="#" class="block industry-text hover:text-white transition-colors duration-300">
+          Industrials
+        </a>
+        <a href="#" class="block industry-text hover:text-white transition-colors duration-300">
+          Defense
+        </a>
+      </nav>
     </div>
+  </div>
 
-    <!-- Hero - Centered, takes full viewport height -->
-    <div class="relative z-10 h-screen">
-      <!-- Admiral Labs - Absolutely centered on full viewport -->
-      <div class="absolute inset-0 flex items-center justify-center">
-        <h1 class="text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight glow-text text-center">
+  <!-- Main Content -->
+  <div class="flex flex-col military-grid ml-64">
+
+    <!-- Hero Section - Boat and Title -->
+    <div class="h-screen flex flex-col items-center justify-center px-8">
+      <!-- ASCII Animation -->
+      <div class="relative z-10 flex items-center justify-center opacity-30" style="flex: 1.2;">
+        <pre id="ascii-canvas" class="ascii-canvas"></pre>
+      </div>
+
+      <!-- Admiral Labs Title -->
+      <div class="relative z-10 text-center flex items-center justify-center" style="flex: 0.8; margin-top: -4cm;">
+        <h1 class="text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight glow-text">
           Admiral Labs
         </h1>
       </div>
 
-      <!-- Subtitle and Industries - Bottom section -->
-      <div class="absolute bottom-0 left-0 right-0 text-center pb-6">
-        <h2 class="text-2xl md:text-3xl lg:text-4xl font-light tracking-tight leading-tight mb-6">
-          Secure AI for Mission Critical Operations
-        </h2>
-        <div class="sticky top-0 z-20 max-w-4xl mx-auto px-4 bg-black py-2">
-          <div class="grid grid-cols-5 gap-px bg-white bg-opacity-20">
-            <div
-              class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
-              <div class="industry-text text-center">Commodity Trading</div>
-            </div>
-            <div
-              class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
-              <div class="industry-text text-center">Supply Chain</div>
-            </div>
-            <div
-              class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
-              <div class="industry-text text-center">TIC</div>
-            </div>
-            <div
-              class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
-              <div class="industry-text text-center">Industrials</div>
-            </div>
-            <div
-              class="industry-cell bg-black px-6 py-4 hover:bg-white hover:bg-opacity-5 transition-all duration-300 flex items-center justify-center">
-              <div class="industry-text text-center">Defense</div>
-            </div>
-          </div>
-        </div>
+      <!-- Scroll indicator -->
+      <div class="text-center pb-6">
+        <svg class="w-8 h-8 text-white opacity-40 animate-bounce mx-auto" fill="none" stroke="currentColor"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </div>
+    </div>
 
-        <!-- Chevron Down -->
-        <div class="mt-3">
-          <svg class="w-12 h-12 text-white opacity-60 animate-bounce mx-auto" fill="none" stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-          </svg>
+    <!-- Capabilities Grid -->
+    <div class="relative z-10 max-w-6xl mx-auto py-16 w-full px-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div class="text-center flex items-center justify-center">
+          <h3 class="text-3xl md:text-4xl font-light">See Clearly</h3>
+        </div>
+        <div class="text-center flex items-center justify-center">
+          <h3 class="text-3xl md:text-4xl font-light">Drive Top-Line Growth</h3>
+        </div>
+        <div class="text-center flex items-center justify-center">
+          <h3 class="text-3xl md:text-4xl font-light">Automate with Confidence</h3>
+        </div>
+        <div class="text-center flex items-center justify-center">
+          <h3 class="text-3xl md:text-4xl font-light">Expand Capacity, not Headcount</h3>
         </div>
       </div>
     </div>
 
-    <!-- Animation Mode Selector - Top right -->
-    <div class="absolute top-20 right-8 z-20 flex flex-col gap-2">
-      <label class="flex items-center gap-2 cursor-pointer text-xs"
-        style="color: #999999; font-family: 'JetBrains Mono', ui-monospace, 'Courier New', monospace;">
-        <input type="radio" name="animation-mode" value="arrival" checked class="cursor-pointer">
-        <span>ARRIVAL</span>
-      </label>
-      <label class="flex items-center gap-2 cursor-pointer text-xs"
-        style="color: #999999; font-family: 'JetBrains Mono', ui-monospace, 'Courier New', monospace;">
-        <input type="radio" name="animation-mode" value="rocking" class="cursor-pointer">
-        <span>ROCKING</span>
-      </label>
-      <label class="flex items-center gap-2 cursor-pointer text-xs"
-        style="color: #999999; font-family: 'JetBrains Mono', ui-monospace, 'Courier New', monospace;">
-        <input type="radio" name="animation-mode" value="arrival-rocking" class="cursor-pointer">
-        <span>ARRIVAL + ROCKING</span>
-      </label>
-    </div>
-
-  </div>
-
-  <!-- Capabilities Section - Below fold -->
-  <div class="relative z-10 py-24 px-8 bg-black">
-    <div class="max-w-6xl mx-auto">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-16 mb-32">
-        <div class="text-center">
-          <h3 class="text-3xl md:text-4xl font-light mb-4">See Clearly</h3>
-        </div>
-        <div class="text-center">
-          <h3 class="text-3xl md:text-4xl font-light mb-4">Drive Top-Line Growth</h3>
-        </div>
-        <div class="text-center">
-          <h3 class="text-3xl md:text-4xl font-light mb-4">Automate with Confidence</h3>
-        </div>
-        <div class="text-center">
-          <h3 class="text-3xl md:text-4xl font-light mb-4">Expand Capacity, not Headcount</h3>
-        </div>
-      </div>
-
-      <!-- Team Section Placeholder -->
-      <div class="text-center py-24 border-t border-white border-opacity-20">
-        <h2 class="text-4xl md:text-5xl font-light">Our Team</h2>
-      </div>
-    </div>
-  </div>
-
-  <!-- Real Footer - At the very bottom -->
-  <div class="relative z-20 py-6 bg-black border-t border-white border-opacity-20">
-    <div class="flex flex-col items-center px-8 max-w-6xl mx-auto gap-2 text-center">
-      <div class="flex justify-center gap-8 mono-caps text-xs" style="color: #999999;">
+    <!-- Location and Contact -->
+    <div class="relative z-10 flex flex-col items-center gap-4 text-center mt-12 mb-12">
+      <div class="flex justify-center gap-8 mono-caps text-sm" style="color: #999999;">
         <span>New York</span>
         <span>—</span>
         <span>London</span>
       </div>
-      <a href="mailto:contact@admirallabs.com" class="text-xs hover:text-white transition-colors duration-300"
+      <a href="mailto:contact@admirallabs.com" class="text-sm hover:text-white transition-colors duration-300"
         style="color: #999999; font-family: 'JetBrains Mono', ui-monospace, 'Courier New', monospace;">
         contact@admirallabs.com
       </a>
     </div>
+
   </div>
 
   <script>
@@ -208,7 +174,7 @@
     let rockingFrames = [];
     let currentFrame = 0;
     let animationInterval = null;
-    let currentAnimationMode = 'arrival';
+    let currentAnimationMode = 'arrival-rocking';
     let isInArrivalPhase = true;
     let arrivalFrames = [];
 
@@ -254,14 +220,6 @@
       }
     }
 
-    // Animation mode radio button handlers
-    document.querySelectorAll('input[name="animation-mode"]').forEach(radio => {
-      radio.addEventListener('change', (e) => {
-        currentAnimationMode = e.target.value;
-        loadAnimation(currentAnimationMode);
-      });
-    });
-
     // Load initial animation
     loadAnimation(currentAnimationMode);
 
@@ -301,29 +259,25 @@
 
     function scaleToFit() {
       const canvas = document.getElementById('ascii-canvas');
-      const container = document.getElementById('ascii-container');
       const isMobile = window.innerWidth < 768;
 
       // Reset scale to measure natural size
       canvas.style.fontSize = '10px';
 
-      const containerWidth = container.clientWidth;
-      const containerHeight = container.clientHeight;
       const contentWidth = canvas.scrollWidth;
       const contentHeight = canvas.scrollHeight;
 
-      // Mobile: scale to 1.0 (full width), Desktop: scale to 0.85
+      // Calculate scale based on available width (accounting for sidebar)
+      const availableWidth = window.innerWidth - 256 - 64; // minus sidebar and padding
       const widthMultiplier = isMobile ? 1.0 : 0.6;
-      const scaleX = containerWidth / contentWidth * widthMultiplier;
-      const scaleY = containerHeight / contentHeight * 0.6;
-      let scale = Math.min(scaleX, scaleY, 2); // Max 2x scale
+      const scaleX = availableWidth / contentWidth * widthMultiplier;
+      let scale = Math.min(scaleX, 2); // Max 2x scale
 
-      // Ensure minimum width for the scaled canvas
-      const minScaledWidth = 800;
-      const minScale = minScaledWidth / contentWidth;
+      // Ensure minimum readable scale
+      const minScale = 0.5;
       scale = Math.max(scale, minScale);
 
-      canvas.style.transform = `translate(-50%, -60%) scale(${scale})`;
+      canvas.style.transform = `scale(${scale})`;
     }
   </script>
 
