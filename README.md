@@ -1,13 +1,16 @@
-# ASCII Ship Animations
+# Admiral Labs Website
 
-Browser-based 3D ship model to ASCII animation generator for Admiral Labs landing page.
+This has
+- The website for Admiral Labs
+- A Browser-based 3D ship model to ASCII animation generator for landing page.
 
 ## Live Demo
 
-- **Landing Page**: https://aymeric-roucher.github.io/AsciiAnimations/
-- **Generator Tool**: https://aymeric-roucher.github.io/AsciiAnimations/web/generator.html
+- **Landing Page**: https://aymeric-roucher.github.io/AdmiralWebsite/
+- **Generator Tool**: https://aymeric-roucher.github.io/AdmiralWebsite/web/generator.html
 
-## Quick Start
+
+## ASCII animation
 
 ### Generate ASCII Animations
 
@@ -38,44 +41,6 @@ http://localhost:8000/web/generator.html
 http://localhost:8000/
 ```
 
-## Project Structure
-
-```
-├── index.html              # Landing page (Admiral Labs)
-├── animation.json          # Generated animation frames
-├── serve.py               # Simple HTTP server
-├── 3d_models/             # Ship 3D models
-│   ├── nao_victoria_galleon_ship.glb
-│   ├── pinnace.obj
-│   └── frigate.obj
-└── web/
-    ├── generator.html     # Interactive 3D viewer & frame generator
-    ├── generator.js       # Three.js ASCII generation logic
-    ├── ascii_player.js    # Animation playback engine (legacy)
-    └── styles.css         # Styling
-```
-
-## Features
-
-### Generator Tool
-- Interactive 3D model viewer with OrbitControls
-- Real-time camera position display (distance, azimuth, elevation)
-- Precise zoom control with slider
-- Two animation modes:
-  - **Stop in middle**: Ship smoothly decelerates to stop at center (cosine easing)
-  - **Pass through**: Ship moves linearly from behind to ahead
-- Adjustable ASCII resolution and character ramp
-- Live ASCII animation preview
-- Automatic JSON export on generation
-
-### Landing Page
-- Full-screen ASCII ship animation background
-- Responsive military-style design
-- Industry header with hover effects
-- Centered hero section
-- Professional typography (ui-sans-serif, ui-monospace)
-
-## Technical Details
 
 ### ASCII Generation
 - **Engine**: Three.js with AsciiEffect
@@ -84,13 +49,7 @@ http://localhost:8000/
 - **Cell Aggregation**: Weighted luminance averaging (0.299×R + 0.587×G + 0.114×B)
 - **Animation**: Ship moves along its forward direction, camera stays fixed
 
-### Camera System
-- Camera position captured from OrbitControls
-- Animation preserves exact viewing angle
-- Only ship position changes during frame generation
-- Zoom syncs bidirectionally (slider ↔ mouse wheel)
-
-## Animation Workflow
+### Animation Workflow for 3D
 
 1. **Position camera** using mouse controls in 3D viewer
 2. **Adjust zoom** for desired framing
@@ -112,15 +71,7 @@ git commit -m "Update ASCII animation"
 git push origin main
 ```
 
-Site updates automatically at: https://aymeric-roucher.github.io/AsciiAnimations/
-
-## Models
-
-- **Victoria** (GLB): Nao Victoria galleon ship - primary model
-- **Pinnace** (OBJ): Historic sailing vessel
-- **Frigate** (OBJ): Naval warship
-
-All models are centered and scaled automatically on load.
+Site updates automatically at: https://aymeric-roucher.github.io/AdmiralWebsite/
 
 ## Browser Requirements
 
